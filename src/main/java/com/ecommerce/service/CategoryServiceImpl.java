@@ -19,4 +19,16 @@ public class CategoryServiceImpl implements CategoryService{
     public void createCategory(Category category) {
         list.add(category);
     }
+
+    @Override
+    public String deleteCategory(Long categoryId) {
+        Category category = list.stream()
+                .filter(c -> c.getCategoryId().equals(categoryId))
+                .findFirst().orElse(null);
+        if (category == null)
+            return "Category not found";
+
+        list.remove(category);
+        return "Category with categoryId: " + categoryId + " deleted successfully !!";
+    }
 }

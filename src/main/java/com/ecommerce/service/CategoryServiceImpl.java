@@ -1,11 +1,11 @@
 package com.ecommerce.service;
 
+import com.ecommerce.exceptions.APIException;
+import com.ecommerce.exceptions.ResourceNotFoundException;
 import com.ecommerce.model.Category;
 import com.ecommerce.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +24,10 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public void createCategory(Category category) {
+        System.out.println(categoryRepository.findByCategoryName(category.getCategoryName()));
+        if(categoryRepository.findByCategoryName(category.getCategoryName()).isPresent()){
+            throw new APIException("category","categoryName",category.getCategoryName());
+        }
         category.setCategoryId(nextId++);
         categoryRepository.save(category);
     }
@@ -35,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService{
         Category category = categories.stream()
                 .filter(c -> c.getCategoryId().equals(categoryId))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("category","categoryId",categoryId));
 
         categoryRepository.delete(category);
         return "Category with categoryId: " + categoryId + " deleted successfully !!";
@@ -55,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService{
             Category savedCategory = categoryRepository.save(existingCategory);
             return savedCategory;
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
+            throw new ResourceNotFoundException("category","categoryId",categoryId);
         }
     }
 }
